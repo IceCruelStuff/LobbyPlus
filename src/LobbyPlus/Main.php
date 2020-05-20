@@ -27,11 +27,14 @@ use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\block\BlockBreakEvent;
 use LobbyPlus\commands\hub;
 
-class main extends PluginBase implements Listener{
+class Main extends PluginBase implements Listener
+{
+
     public $prefix = "§r[§l§aLobbyPlus§r] ";
     public $messages;
 
-    public function onEnable(){
+    public function onEnable()
+    {
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
         $this->getServer()->getPluginManager()->registerEvents(new InteractListener($this), $this);
         $this->getServer()->getCommandMap()->register("LobbyPlus", new hub($this));
@@ -45,11 +48,13 @@ class main extends PluginBase implements Listener{
         $this->getServer()->getCommandMap()->unregister($this->getServer()->getCommandMap()->getCommand("say"));
     }
 
-    public function onDisable(){
+    public function onDisable()
+    {
         $this->getLogger()->info("LobbyPlus is deactivating...");
     }
 
-    public function onJoin(PlayerJoinEvent $event){
+    public function onJoin(PlayerJoinEvent $event)
+    {
         $one = new Item(Item::EMERALD);
         $one->setCustomName($this->Config("settings.yml")->get("players_visible"));
         $this->addItemTag($one, "playersvisibility");
@@ -88,21 +93,27 @@ class main extends PluginBase implements Listener{
         $pmessage = str_replace("%player%", $player->getName(), $pmessage);
         $player->sendMessage($pmessage);
     }
-    public function onDrop(PlayerDropItemEvent $event){
+
+    public function onDrop(PlayerDropItemEvent $event)
+    {
         if($this->Config("settings.yml")->get("allow-dropping") == false){
             $event->setCancelled(true);
             $player = $event->getPlayer();
             $player->sendMessage($this->prefix . $this->messages->get("Drop_Items"));
         }
     }
-    public function onConsume(PlayerItemConsumeEvent $event){
+
+    public function onConsume(PlayerItemConsumeEvent $event)
+    {
         if($this->Config("settings.yml")->get("allow-consume") == false) {
             $event->setCancelled(true);
             $player = $event->getPlayer();
             $player->sendMessage($this->prefix . $this->messages->get("Consume_items"));
         }
     }
-    public function onCrafting(CraftItemEvent $event){
+
+    public function onCrafting(CraftItemEvent $event)
+    {
         if($this->Config("settings.yml")->get("allow-crafting") == false) {
             $event->setCancelled(true);
             $player = $event->getPlayer();
@@ -110,27 +121,31 @@ class main extends PluginBase implements Listener{
         }
     }
 
-    public function onBuild(BlockPlaceEvent $event){
+    public function onBuild(BlockPlaceEvent $event)
+    {
         if(!$event->getPlayer()->hasPermission("lobbyplus.build")){
             $event->setCancelled();
         }
     }
 
-    public function addItemTag(item $item, string $tag) : item{
+    public function addItemTag(item $item, string $tag) : item
+    {
         $nbt = $item->getNamedTag();
         $nbt->setString("lobbyplus", $tag, true);
         $item->setCompoundTag($nbt);
         return $item;
     }
 
-    public function removeItemTag(item $item) : item{
+    public function removeItemTag(item $item) : item
+    {
         $nbt = $item->getNamedTag();
         $nbt->removeTag("lobbyplus");
         $item->setCompoundTag($nbt);
         return $item;
     }
 
-    public function hasItemTag(item $item) : bool{
+    public function hasItemTag(item $item) : bool
+    {
         $nbt = $item->getNamedTag();
         return $nbt->hasTag("lobbyplus", StringTag::class);
     }
@@ -140,18 +155,18 @@ class main extends PluginBase implements Listener{
         return $nbt->getString("lobbyplus");
     }
 
-        public function onDeath(EntityDamageEvent $event)
-{
-    if($event->getEntity() instanceof Player) {
-        if($event->getEntity()->getHealth() < $event->getFinalDamage()) {
-            if ($this->Config("settings.yml")->get("allow-death") == false) {
-                $event->setCancelled(true);
-                $player = $event->getEntity();
-                $player->sendMessage($this->prefix . $this->Config("messages.yml")->get("death"));
+    public function onDeath(EntityDamageEvent $event)
+    {
+        if($event->getEntity() instanceof Player) {
+            if($event->getEntity()->getHealth() < $event->getFinalDamage()) {
+                if ($this->Config("settings.yml")->get("allow-death") == false) {
+                    $event->setCancelled(true);
+                    $player = $event->getEntity();
+                    $player->sendMessage($this->prefix . $this->Config("messages.yml")->get("death"));
+                }
             }
         }
     }
-}
 
     public function onDamage(EntityDamageEvent $event)
     {
@@ -160,24 +175,28 @@ class main extends PluginBase implements Listener{
         }
     }
 
-    public function onHunger(PlayerExhaustEvent $event){
+    public function onHunger(PlayerExhaustEvent $event)
+    {
         if($this->Config("settings.yml")->get("allow-hunger") == false) {
             $event->setCancelled(true);
         }
     }
 
-    public function onTransact(InventoryTransactionEvent $event){
+    public function onTransact(InventoryTransactionEvent $event)
+    {
         if(!$event->getTransaction()->getSource()->hasPermission("lobbyplus.transact"))
         $event->setCancelled(true);
     }
 
-    public function onBreak(BlockBreakEvent $event){
+    public function onBreak(BlockBreakEvent $event)
+    {
         if(!$event->getPlayer()->hasPermission("lobbyplus.break")){
             $event->setCancelled();
         }
     }
 
-    public function onQuit(PlayerQuitEvent $event){
+    public function onQuit(PlayerQuitEvent $event)
+    {
         if($this->Config("settings.yml")->get("custom-quitmessage") == true) {
             $player = $event->getPlayer();
             $message = $this->Config("messages.yml")->get("LeaveMessage");
@@ -186,7 +205,8 @@ class main extends PluginBase implements Listener{
         }
     }
 
-    public function onChat(PlayerChatEvent $event){
+    public function onChat(PlayerChatEvent $event)
+    {
         if($this->Config("settings.yml")->get("allow-chat") == false) {
             if (!$event->getPlayer()->isOp() && !$event->getPlayer()->hasPermission("lobbyplus.chat")) {
                 $event->setCancelled(true);
@@ -196,11 +216,14 @@ class main extends PluginBase implements Listener{
     }
 
     
-    public function Config($file){
+    public function Config($file)
+    {
         $file = new Config($this->getDataFolder().$file, 2);
         return $file;
     }
-    public function openHelpUI($player){
+
+    public function openHelpUI($player)
+    {
         $form = new SimpleForm(function (Player $player, int $data = null){
 
             $result = $data;
@@ -221,7 +244,9 @@ class main extends PluginBase implements Listener{
         return $form;
 
     }
-    public function openTeleUI($player){
+
+    public function openTeleUI($player)
+    {
         $form = new SimpleForm(function (Player $player, $data = null){
 
             $result = $data;
@@ -244,7 +269,8 @@ class main extends PluginBase implements Listener{
         return $form;
     }
 
-    public function openPerksUI($player){
+    public function openPerksUI($player)
+    {
         $form = new SimpleForm(function (Player $player, int $data = null){
 
             $result = $data;
